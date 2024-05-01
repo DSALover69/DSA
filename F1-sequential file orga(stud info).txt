@@ -1,0 +1,134 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <cstring>
+
+using namespace std;
+
+class Student {
+    int roll;
+    char name[100];
+    char Div[20];
+    char addr[20];
+
+public:
+    void input();
+    void show();
+    int getRoll() {
+        return roll;
+    }
+};
+
+void Student::input() {
+    cout << "Enter Roll No: ";
+    cin >> roll;
+    cout << "Enter Name: ";
+    cin.ignore(); // Clear newline left in buffer
+    cin.getline(name, 100);
+    cout << "Enter Div: ";
+    cin >> Div;
+    cout << "Enter Address: ";
+    cin.ignore(); // Clear newline left in buffer
+    cin.getline(addr, 20);
+}
+
+void Student::show() {
+    cout << "\nRoll No: " << roll << "\tName: " << name << "\tDiv: " << Div << "\tAddress: " << addr;
+}
+
+fstream f;
+Student s;
+
+void create() {
+    char ch = 'y';
+    f.open("binary.txt", ios::out | ios::binary);
+    while (ch == 'y' || ch == 'Y') {
+        s.input();
+        f.write(reinterpret_cast<char*>(&s), sizeof(s));
+        cout << "Want to Continue? (y/n): ";
+        cin >> ch;
+    }
+    f.close();
+}
+
+void add() {
+    char ch = 'y';
+    f.open("binary.dat", ios::app | ios::binary);
+    while (ch == 'y' || ch == 'Y') {
+        s.input();
+        f.write(reinterpret_cast<char*>(&s), sizeof(s));
+        cout << "Want to Continue? (y/n): ";
+        cin >> ch;
+    }
+    f.close();
+}
+
+void display() {
+    f.open("binary.txt", ios::in | ios::binary);
+    if (!f) {
+        cout << "File not Found";
+        exit(0);
+    } else {
+        f.read(reinterpret_cast<char*>(&s), sizeof(s));
+        while (!f.eof()) {
+            s.show();
+            f.read(reinterpret_cast<char*>(&s), sizeof(s));
+        }
+    }
+    f.close();
+}
+
+void search() {
+    int n, fl = 0;
+    cout << "Enter Roll no of student to be searched: ";
+    cin >> n;
+    f.open("binary.dat", ios::in | ios::binary);
+    if (!f) {
+        cout << "File not Found";
+        exit(0);
+    } else {
+        f.read(reinterpret_cast<char*>(&s), sizeof(s));
+        while (!f.eof()) {
+            if (n == s.getRoll()) {
+                s.show();
+                fl = 1;
+                break;
+            } else
+                f.read(reinterpret_cast<char*>(&s), sizeof(s));
+        }
+        if (fl == 0)
+            cout << "\nRecord does not exist!";
+    }
+    f.close();
+}
+
+int main() {
+    int choice;
+    do {
+        cout << "\nMenu:\n1. Create Data File\n2. Add New Record\n3. Display All Records\n4. Search Record\n5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                create();
+                break;
+            case 2:
+                add();
+                break;
+            case 3:
+                display();
+                break;
+            case 4:
+                search();
+                break;
+            case 5:
+                cout << "Exiting program. Goodbye!";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
+1
